@@ -1,4 +1,4 @@
-﻿import fs from "fs";
+﻿import fs from "node:fs";
 import { dm_funcs as funcs, dm_funcs, func_names } from "./dm_funcs";
 
 function getCSType(type: string) {

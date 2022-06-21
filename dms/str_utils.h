@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 
 //
 inline std::string bstr_to_utf8(const _bstr_t& bstr) {
@@ -116,4 +117,5 @@ inline std::string url_decode(const std::string& str) {
 // 字符串 转 URL Encoded
 inline _bstr_t encoded_uri_component_to_bstr(const std::string& encoded) {
     return { utf8_to_utf16(url_decode(encoded)).c_str() };
+
 }

@@ -7,6 +7,7 @@
 #include <IPHlpApi.h>
 #include <stdio.h>
 #include <thread>
+#include "tcp_handler.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -21,23 +22,35 @@ inline void run(SOCKET&& ClientSocket)
     char recvbuf[DeFAULT_BUFLEN];
     int recvbuflen = DeFAULT_BUFLEN;
 
+    char res_buf[DeFAULT_BUFLEN];
+
+
+    Idmsoft* dm = create_dm();
+
     while (iResult = recv(ClientSocket, recvbuf, recvbuflen, 0))
     {
         if (iResult <= 0) break;
 
         printf("Bytes received: %s\n", recvbuf);
-        iSendResult = send(ClientSocket, recvbuf, iResult, 0);
+
+        std::string ret = Demo::handle_message(std::string(&recvbuf[0]), dm);
+
+
+        strcpy_s(res_buf, ret.c_str());
+
+        iSendResult = send(ClientSocket, ret.c_str(), 256, 0);
         if (iSendResult == SOCKET_ERROR)
         {
             printf("send failed: %d\n", WSAGetLastError());
             break;
         }
-        printf("Bytes sent: %d\n", iSendResult);
+        printf("Bytes sent: %d\n", res_buf);
     }
 
     //// 断开连接并清理连接
     iResult = shutdown(ClientSocket, SD_SEND);
     closesocket(ClientSocket);
+    dm->Release();
 }
 
 inline int tcp()

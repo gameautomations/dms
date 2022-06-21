@@ -161,6 +161,7 @@
     <ClInclude Include="mmf.h" />
     <ClInclude Include="str_utils.h" />
     <ClInclude Include="tcp.h" />
+    <ClInclude Include="tcp_handler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

@@ -3,53 +3,43 @@ import { dm_funcs as funcs, dm_funcs, func_names } from "./dm_funcs";
 
 // language=CS
 const template = (injected: string) => `
-using System.IO.MemoryMappedFiles;
+using System.Net.Sockets;
 using System.Text;
 
-namespace gacs.Dm;
+namespace gas.GaEngine;
 public class Dmsoft {
-    private static readonly int BUFF_SIZE = 1024;
-    private readonly int _id = 0;
-    private readonly MemoryMappedFile _mmf;
-    private readonly MemoryMappedViewAccessor _mmfAccessor;
-    private readonly Semaphore _dmmmfReqSignal;
-    private readonly Semaphore _dmmmfResSignal;
-    private bool ready = true;
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
-    public Dmsoft() {
-        _id = DmFactory.Create();
-        _mmf = MemoryMappedFile.OpenExisting($"dmmmf_____{_id}");
-        _mmfAccessor = _mmf.CreateViewAccessor(0, BUFF_SIZE);
-        _dmmmfReqSignal = Semaphore.OpenExisting($"dmmmfReqSignal_____{_id}");
-        _dmmmfResSignal = Semaphore.OpenExisting($"dmmmfResSignal_____{_id}");
+    private static string host = "localhost";
+    private static int port = 13000;
+    private TcpClient _client;
+    private NetworkStream _stream;
+    public Dmsoft()
+    {
+        _client = new TcpClient(host, port);
+        _stream = _client.GetStream();
     }
 
-    ~Dmsoft() {
-        _mmfAccessor.Dispose();
-        _mmf.Dispose();
-        _dmmmfReqSignal.Dispose();
-        _dmmmfResSignal.Dispose();
+    ~Dmsoft()
+    {
+        _stream.Close();
+        _client.Close();
     }
-
-    // getId
-    public int GetId() {
-        return _id;
-    }
-
     // 发送消息
-    public string Call(params object[] list) {
+    public string Call(params object[] list)
+    {
         string cmd = "";
-        for (int i = 0; i < list.Length; i++) {
+        for (int i = 0; i < list.Length; i++)
+        {
             cmd += list[i] + (i == list.Length - 1 ? "" : ",");
         }
 
-        byte[] reqBuffer = Encoding.UTF8.GetBytes(_id + "," + cmd + '\0');
-        _mmfAccessor.WriteArray(0, reqBuffer, 0, reqBuffer.Length);
-        _dmmmfReqSignal.Release();
-        _dmmmfResSignal.WaitOne();
-        byte[] resBuffer = new byte[BUFF_SIZE];
-        _mmfAccessor.ReadArray(0, resBuffer, 0, resBuffer.Length);
+        cmd += "\\0";
+
+        byte[] reqBuffer = Encoding.UTF8.GetBytes(cmd);
+
+        _stream.Write(reqBuffer);
+
+        byte[] resBuffer = new byte[256];
+        _stream.Read(resBuffer, 0, resBuffer.Length);
         string res = Encoding.UTF8.GetString(resBuffer);
         return res.Split("\0")[0];
     }
@@ -106,7 +96,6 @@ export default function create_charp_mmf_client() {
 
             let l = "";
             l += `public ${retType} ${f.funcName} (${paramsStr}){\n`;
-            l += "try {\n";
             l += `${
                 f.outParams.length > 0
                     ? "string resStr ="
@@ -123,7 +112,7 @@ export default function create_charp_mmf_client() {
                     ? ")"
                     : ""
             };\n`;
-            l += `} catch (Exception e) {}\n`;
+
 
             if (f.outParams.length > 0) {
                 const parser = `${f.outParams
@@ -142,5 +131,5 @@ export default function create_charp_mmf_client() {
         .join("\n");
 
     const result = template(injected);
-    fs.writeFileSync("lib/DmsoftTcp.cs", result);
+    fs.writeFileSync("lib/Dmsoft2.cs", result);
 }
