@@ -16,45 +16,40 @@
 
 inline void run(SOCKET&& ClientSocket)
 {
-    int iResult;
-    int iSendResult;
-
-    char recvbuf[DeFAULT_BUFLEN];
-    int recvbuflen = DeFAULT_BUFLEN;
-
-    char res_buf[DeFAULT_BUFLEN];
-
+    int code;
+    char data[DeFAULT_BUFLEN];
 
     Idmsoft* dm = create_dm();
 
-    while (iResult = recv(ClientSocket, recvbuf, recvbuflen, 0))
+    while (code = recv(ClientSocket, data, DeFAULT_BUFLEN, 0))
     {
-        if (iResult <= 0) break;
+        if (code <= 0) break;
 
-        printf("Bytes received: %s\n", recvbuf);
+        // 调用大漠
+        std::string ret = handle_message(std::string(data), dm);
 
-        std::string ret = Demo::handle_message(std::string(&recvbuf[0]), dm);
-
-
-        strcpy_s(res_buf, ret.c_str());
-
-        iSendResult = send(ClientSocket, ret.c_str(), 256, 0);
-        if (iSendResult == SOCKET_ERROR)
+        // 发送结果
+        code = send(ClientSocket, ret.c_str(), DeFAULT_BUFLEN, 0);
+        if (code == SOCKET_ERROR)
         {
-            printf("send failed: %d\n", WSAGetLastError());
+            printf("Socket 发送失败: %d\n", WSAGetLastError());
             break;
         }
-        printf("Bytes sent: %d\n", res_buf);
     }
 
-    //// 断开连接并清理连接
-    iResult = shutdown(ClientSocket, SD_SEND);
+    // 断开连接并清理连接
+    code = shutdown(ClientSocket, SD_SEND);
     closesocket(ClientSocket);
     dm->Release();
 }
 
 inline int tcp()
 {
+    // 初始化全局 大漠 并注册
+    Idmsoft* dm = create_dm();
+    dm->Reg("ysh35dd46fa0a5c6dfa485e5efe738aa2f2e2", "112358");
+
+    // 创建 socket 服务器
     WSADATA wsaData;
     int iResult;
     int iSendResult;

@@ -3,7 +3,7 @@
 
 #include "str_utils.h"
 #include "dm.h"
-#include "dm_task_constants.h" 
+#include "dm_task_constants.h"
 
 using namespace std; // NOLINT(clang-diagnostic-header-hygiene)
 
