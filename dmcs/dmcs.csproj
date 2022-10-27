@@ -10,15 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<COMReference Include="dm">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>0</VersionMinor>
-			<VersionMajor>1</VersionMajor>
-			<Guid>84288aad-ba02-4ef2-85ec-3fad4d11354d</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
-			<EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1414-prerelease" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -26,7 +18,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="DLL\DmReg.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
