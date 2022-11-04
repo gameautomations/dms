@@ -26,28 +26,10 @@
     <ClInclude Include="dm_dispatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dm_task_constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dm_task_control.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dm_task_runner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="dm_task_states.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="http.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mmf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="str_utils.h">
+    <ClInclude Include="str.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tcp.h">
@@ -55,9 +37,6 @@
     </ClInclude>
     <ClInclude Include="dm.h">
       <Filter>dm</Filter>
-    </ClInclude>
-    <ClInclude Include="tcp_handler.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -152,16 +152,9 @@
   <ItemGroup>
     <ClInclude Include="dm.h" />
     <ClInclude Include="dm_dispatcher.h" />
-    <ClInclude Include="dm_task_constants.h" />
-    <ClInclude Include="dm_task_control.h" />
-    <ClInclude Include="dm_task_runner.h" />
-    <ClInclude Include="dm_task_states.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="http.h" />
-    <ClInclude Include="mmf.h" />
-    <ClInclude Include="str_utils.h" />
+    <ClInclude Include="str.h" />
     <ClInclude Include="tcp.h" />
-    <ClInclude Include="tcp_handler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
