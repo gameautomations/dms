@@ -43,13 +43,12 @@ public class Dmsoft {
         byte[] resBuffer = new byte[256];
         _stream.Read(resBuffer, 0, resBuffer.Length);
         string res = Encoding.UTF8.GetString(resBuffer).Split("\0")[0];
-        var result = res.Split("\n");
-        var code = result[0];
-        if(code == "0")
+        var code = res.Substring(0, 1);
+        if (code == "0")
         {
-            return result[1];
+            return res.Substring(2);
         }
-        throw new Exception(result[1]);
+        throw new Exception(res);
     }
 
         public string Ver (){
