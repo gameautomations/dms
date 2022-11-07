@@ -41,7 +41,7 @@ const funcs = rawFile
                     });
 
                     if (_split[0] === "VARIANT*") {
-                        func.params.push({
+                        func.outParams.push({
                             type: _split[0],
                             name: _split[1],
                         });

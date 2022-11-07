@@ -18,8 +18,6 @@
 #define DEFAULT_PORT "13000"
 #define DeFAULT_BUFLEN 256
 
-const char *const request_error = "-1,-1,-2,-3,-5,-8,-13,-21,-34,400_____";
-
 string handle_message(std::string message, Idmsoft *dm) {
   std::vector<std::string> cmds = split(message, "\n");
   std::string ret;
@@ -27,7 +25,7 @@ string handle_message(std::string message, Idmsoft *dm) {
     // 调用大漠返回结果
     ret = dm_call(std::move(cmds), dm);
   } catch (exception &e) {
-    ret = std::format("{}{}", request_error, e.what());
+    ret = std::format("1\n{}", e.what());
   }
 
   return ret;

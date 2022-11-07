@@ -12,6 +12,7 @@ public class Dmsoft {
     private static int port = 13000;
     private TcpClient _client;
     private NetworkStream _stream;
+
     public Dmsoft()
     {
         _client = new TcpClient(host, port);
@@ -20,8 +21,13 @@ public class Dmsoft {
 
     ~Dmsoft()
     {
-        _stream.Close();
-        _client.Close();
+        Release();
+    }
+
+    public void Release()
+    {
+        if (_stream != null) _stream.Close();
+        if (_client != null) _client.Close();
     }
     // 发送消息
     public string Call(params object[] list)
@@ -29,7 +35,7 @@ public class Dmsoft {
         string cmd = "";
         for (int i = 0; i < list.Length; i++)
         {
-            cmd += list[i] + (i == list.Length - 1 ? "" : ",");
+            cmd += list[i] + (i == list.Length - 1 ? "" : "\\n");
         }
 
         cmd += "\\0";
@@ -40,8 +46,14 @@ public class Dmsoft {
 
         byte[] resBuffer = new byte[256];
         _stream.Read(resBuffer, 0, resBuffer.Length);
-        string res = Encoding.UTF8.GetString(resBuffer);
-        return res.Split("\0")[0];
+        string res = Encoding.UTF8.GetString(resBuffer).Split("\\0")[0];
+        var result = res.Split("\\n");
+        var code = result[0];
+        if(code == "0")
+        {
+            return result[1];
+        }
+        throw new Exception(result[1]);
     }
 
         ${injected
@@ -113,12 +125,11 @@ export default function create_charp_mmf_client() {
                     : ""
             };\n`;
 
-
             if (f.outParams.length > 0) {
                 const parser = `${f.outParams
                     .map((v, k) => `int.Parse(resArray[${k + 1}])`)
                     .join(",")}`;
-                l += `string[] resArray = resStr.Split(",");\n`;
+                l += `string[] resArray = resStr.Split("\\n");\n`;
                 l += `return (${
                     f.returnType === "_bstr_t"
                         ? "resArray[0]"
@@ -131,5 +142,5 @@ export default function create_charp_mmf_client() {
         .join("\n");
 
     const result = template(injected);
-    fs.writeFileSync("lib/Dmsoft2.cs", result);
+    fs.writeFileSync("lib/Dmsoft.cs", result);
 }
