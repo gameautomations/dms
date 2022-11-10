@@ -5,23 +5,17 @@ import { dm_funcs as funcs, dm_funcs, func_names } from "./dm_funcs";
 const template = (injected: string) => `
 using System.Net.Sockets;
 using System.Text;
-namespace gacs.Dm;
 
-public class Dmsoft
-{
+namespace gas.GaEngine;
+public class Dmsoft {
     private static string host = "localhost";
     private static int port = 13000;
-    private TcpClient _client = null!;
-    private NetworkStream _stream = null!;
+    private TcpClient _client;
+    private NetworkStream _stream;
 
     public Dmsoft()
     {
-        _client = new TcpClient();
-    }
-
-    public async void Connect()
-    {
-        await _client.ConnectAsync(host, port);
+        _client = new TcpClient(host, port);
         _stream = _client.GetStream();
     }
 
@@ -30,22 +24,13 @@ public class Dmsoft
         Release();
     }
 
-    public async Task Release()
+    public void Release()
     {
-        if (_stream != null)
-        {
-            await _stream.DisposeAsync();
-            _stream.Close();
-        }
-        if (_client != null)
-        {
-            _client.Dispose();
-            _client.Close();
-        }
+        if (_stream != null) _stream.Close();
+        if (_client != null) _client.Close();
     }
-
     // 发送消息
-    public async Task<string> Call(params object[] list)
+    public string Call(params object[] list)
     {
         string cmd = "";
         for (int i = 0; i < list.Length; i++)
@@ -57,10 +42,10 @@ public class Dmsoft
 
         byte[] reqBuffer = Encoding.UTF8.GetBytes(cmd);
 
-        await _stream.WriteAsync(reqBuffer);
+        _stream.Write(reqBuffer);
 
         byte[] resBuffer = new byte[256];
-        await _stream.ReadAsync(resBuffer, 0, resBuffer.Length);
+        _stream.Read(resBuffer, 0, resBuffer.Length);
         string res = Encoding.UTF8.GetString(resBuffer).Split("\\0")[0];
         var code = res.Substring(0, 1);
         if (code == "0")
@@ -121,12 +106,12 @@ export default function create_charp_mmf_client() {
             }
 
             let l = "";
-            l += `public async Task<${retType}> ${f.funcName} (${paramsStr}){\n`;
+            l += `public ${retType} ${f.funcName} (${paramsStr}){\n`;
             l += `${
                 f.outParams.length > 0
                     ? "string resStr ="
                     : `return ${f.returnType === "_bstr_t" ? "" : "int.Parse("}`
-            } await Call(${func_names[f.funcName]}${
+            } Call(${func_names[f.funcName]}${
                 f.params.filter((v) => v.type !== "VARIANT*").length > 0
                     ? ","
                     : ""
