@@ -35,13 +35,13 @@ const funcs = rawFile
                     .split(" ");
 
                 if (_split[0]) {
-                    func.params.push({
-                        type: _split[0],
-                        name: _split[1],
-                    });
-
                     if (_split[0] === "VARIANT*") {
                         func.outParams.push({
+                            type: _split[0],
+                            name: _split[1],
+                        });
+                    } else {
+                        func.params.push({
                             type: _split[0],
                             name: _split[1],
                         });
@@ -53,8 +53,3 @@ const funcs = rawFile
     });
 
 export const dm_funcs = funcs;
-
-export const func_names = funcs.reduce(
-    (a, b) => ({ ...a, [b.funcName]: b.hashCode }),
-    {}
-);
