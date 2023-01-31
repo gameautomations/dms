@@ -1,24 +1,30 @@
 import { dm_funcs } from "./dm_funcs";
+const a1 = {
+    hashCode: 413,
+    returnType: "_bstr_t",
+    funcName: "FindPicSimMemE",
+    params: [
+        { type: "long", name: "x1" },
+        { type: "long", name: "y1" },
+        { type: "long", name: "x2" },
+        { type: "long", name: "y2" },
+        { type: "_bstr_t", name: "pic_info" },
+        { type: "_bstr_t", name: "delta_color" },
+        { type: "long", name: "sim" },
+        { type: "long", name: "dir" },
+    ],
+    outParams: [],
+};
 
 // c语言类型转换为 JS 类型
-function cType2JsType(cType: string) {
+function cType2CsType(cType: string, name) {
     return {
-        __int64: "number",
-        long: "number",
-        float: "number",
-        double: "number",
-        _bstr_t: "string",
+        __int64: `long.Parse(${name})`,
+        long: `int.Parse(${name})`,
+        float: `float.Parse(${name})`,
+        double: `double.Parse(${name})`,
+        _bstr_t: name,
     }[cType];
-}
-
-// 更具类型获得类型转换函数
-function transType(name: string, type: string) {
-    const jsType = cType2JsType(type);
-    if (jsType === "number") {
-        return `Number(${name})`;
-    }
-
-    return name;
 }
 
 let a = "";
@@ -26,39 +32,36 @@ let a = "";
 dm_funcs.forEach((v) => {
     let funcStr = "";
 
-    const paramsListStr = v.params
-        .map((p) => `${p.name}: ${cType2JsType(p.type)}`)
+    const allParams = [...v.params, ...v.outParams];
+
+    const paramsListStr = allParams
+        .map((p, k) => {
+            return p.type === "VARIANT*"
+                ? `out ${p.name}`
+                : cType2CsType(p.type, `inputs[${k + 1}]`);
+        })
         .join(",");
+    const resultListStr = v.outParams
+        .map((p) => {
+            return `\\n{${p.name}}`;
+        })
+        .join("");
 
-    const outParamsListStr = v.outParams.map((p) => "number").join(",");
+    funcStr += `case ${v.hashCode}:`;
+    funcStr += `res = dm.${v.funcName}(${paramsListStr});\n`;
+    funcStr += `return $"{res}${resultListStr}";`;
 
-    if (outParamsListStr.length) {
-        funcStr += `async ${
-            v.funcName
-        }(${paramsListStr}):Promise<[${cType2JsType(
-            v.returnType
-        )},${outParamsListStr}]>`;
+    if (v.hashCode === 32 || v.hashCode === 33) {
+        a += `
+            case ${v.hashCode}:
+            refX = int.Parse(inputs[2]);
+            refY = int.Parse(inputs[3]);
+            res = dm.ClientToScreen(int.Parse(inputs[1]), ref refX, ref refY);
+            return $"{res}\\n{refX}\\n{refY}";`;
     } else {
-        funcStr += `async ${
-            v.funcName
-        }(${paramsListStr}):Promise<${cType2JsType(v.returnType)}>`;
+        a += funcStr;
     }
-
-    const callParamsListStr = v.params.map((p) => p.name).join(",");
-
-    funcStr += `{ const res = await this.exec(${v.hashCode},${callParamsListStr});`;
-
-    if (outParamsListStr.length) {
-        const outputStr =
-            `${transType("arr[0]", v.returnType)},` +
-            v.outParams.map((p, k) => `Number(arr[${k + 1}])`).join(",");
-        funcStr += `const arr = res.split('\\n');`;
-        funcStr += `return [${outputStr}];}\n`;
-    } else {
-        funcStr += `return ${transType("res", v.returnType)};}\n`;
-    }
-
-    a += funcStr;
 });
+
 import fs from "node:fs";
 fs.writeFileSync("a.txt", a);
